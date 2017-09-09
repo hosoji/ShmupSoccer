@@ -43,10 +43,7 @@ public class RespawnScript : MonoBehaviour {
 		Debug.Log ("Respawn");
 		player.SetActive (true);
 
-		if (player.GetComponentInChildren<BulletScript> () != null) {
-			Destroy (player.GetComponentInChildren<BulletScript> ().gameObject);
-		}
-
+	
 		ResetPlayer (player);
 
 		if (ui != null) {
@@ -59,19 +56,27 @@ public class RespawnScript : MonoBehaviour {
 
 	public void ResetPlayer(GameObject player){
 
-		player.GetComponent<FuelScript> ().Fuel = player.GetComponent<FuelScript> ().maxFuel;
-		player.GetComponent<HealthScript> ().Health = player.GetComponent<HealthScript> ().maxHealth;
+		if (player.GetComponentInChildren<BulletScript> () != null) {
+			Destroy (player.GetComponentInChildren<BulletScript> ().gameObject);
+		}
+
+		player.GetComponent<FuelScript> ().Fuel = player.GetComponent<PlayerStats> ().maxFuel;
+		player.GetComponent<HealthScript> ().Health = player.GetComponent<PlayerStats> ().maxHealth;
 
 		player.transform.position = player.GetComponent<TeamAssignment> ().startPos;
 
 
 		if (player.GetComponent<StrikerScript> () != null) {
-			player.GetComponent<StrikerScript> ().speed = player.GetComponent<StrikerScript> ().defaultSpeed;
+			player.GetComponent<StrikerScript> ().currentSpeed = player.GetComponent<StrikerScript> ().defaultSpeed;
 			player.GetComponent<StrikerScript> ().projectileExist = false;
 		}
 
 
 		if (player.GetComponent<DefenderScript> () != null) {
+
+			player.transform.SetParent (null);
+			player.transform.GetChild(0).gameObject.SetActive(true);
+
 
 			GameObject[] markers = GameObject.FindGameObjectsWithTag ("Marker");
 
@@ -84,6 +89,7 @@ public class RespawnScript : MonoBehaviour {
 			player.GetComponent<DefenderScript> ().hasJumped = false;
 			player.GetComponent<DefenderScript> ().isJumping = false;
 			player.GetComponent<Rigidbody> ().useGravity = true;
+			player.GetComponent<Rigidbody> ().isKinematic = false;
 
 		}
 	}

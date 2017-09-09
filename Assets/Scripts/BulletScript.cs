@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BulletScript : MonoBehaviour {
 
-
+	Ray ray;
 	Rigidbody rb;
 
 	public bool released = false;
@@ -19,19 +19,38 @@ public class BulletScript : MonoBehaviour {
 
 	RespawnScript respawn;
 
+	TrailRenderer tr;
+
+	public Material p1Mat, p2Mat;
 
 	// Use this for initialization
 	void Awake () {
 		rb = GetComponent<Rigidbody> ();
 		player = transform.parent.gameObject.GetComponent<StrikerScript>();
+		rb.isKinematic = true;
 		respawn = GameObject.FindGameObjectWithTag("GameManager").GetComponent<RespawnScript> ();
 
+		tr = GetComponent<TrailRenderer> ();
+
+
+	}
+
+	void Start(){
+		if (playerNum == 1) {
+			tr.material = p1Mat;
+		} else if (playerNum == 2) {
+			tr.material = p2Mat;
+		}
 	}
 	
 	// Update is called once per frame
 	void Update () {
+//		ray = new Ray (transform.position, transform.forward);
+//		Vector3 reflectRay = Vector3.Reflect (transform.position, ray);
+
 
 		if (released) {
+			
 
 			StartCoroutine (DampenBullet ());
 		}
@@ -42,38 +61,47 @@ public class BulletScript : MonoBehaviour {
 			Destroy(gameObject);
 		}
 
-		bulletPower = transform.localScale.magnitude * rb.velocity.magnitude * player.projectilePower;
-
+		bulletPower = transform.localScale.magnitude * rb.velocity.magnitude * player.projectilePower * 0.7f;
+	
 
 	}
 
-	void OnTriggerEnter(Collider col){
+	void OnCollisionEnter(Collision col){
+		if (col.transform.tag == "Deflector") {
+			print ("collided with pivot");
+			Vector3 hitPos = col.contacts [0].point; 
+			rb.velocity = Vector3.Reflect (hitPos - transform.position, col.contacts[0].normal ) * bulletPower;
+
+		}
+
 		if (col.transform.tag == "Wall") {
-			player.projectileExist = false;
-			player.projectilePower = 0f;
+			ResetProjectileStatus ();
 			Destroy (gameObject);
 		}
 
+
+
 		if (col.transform.tag == "Player") {
+			PlayerStats stats = col.gameObject.GetComponent<PlayerStats> ();
 	
 
 			if (col.gameObject != player.gameObject) {
 
 				if (!col.gameObject.GetComponent<HealthScript> ().vulnerable) {
-					if (col.gameObject.GetComponent<HealthScript> ().Health - player.projectilePower * 5 > 0) {
-						col.gameObject.GetComponent<HealthScript> ().Health -= player.projectilePower * 5;
+					if (col.gameObject.GetComponent<HealthScript> ().Health - player.projectilePower * stats.projDamage > 0) {
+						col.gameObject.GetComponent<HealthScript> ().Health -= player.projectilePower * stats.projDamage;
 					} else {
 						respawn.RespawnPlayer (col.gameObject);
 						col.gameObject.SetActive (false);
 					}
 
 				} else {
-					col.gameObject.GetComponent<HealthScript> ().Health -= player.projectilePower * 5;
+					col.gameObject.GetComponent<HealthScript> ().Health -= player.projectilePower * stats.projDamage;
 				}
 
+				ResetProjectileStatus ();
 				Destroy (gameObject);
-				player.projectileExist = false;
-				player.projectilePower = 0f;
+
 			}
 		
 		}
@@ -89,4 +117,12 @@ public class BulletScript : MonoBehaviour {
 
 			
 	}
+
+	public void ResetProjectileStatus(){
+		player.projectileExist = false;
+		player.projectilePower = 0f;
+	}
+
+
+
 }

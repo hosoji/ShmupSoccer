@@ -28,6 +28,7 @@ public class PivotScript : MonoBehaviour {
 	HealthScript health;
 	FuelScript fuel;
 	TeamAssignment input;
+	PlayerStats stats;
 
 
 
@@ -36,6 +37,7 @@ public class PivotScript : MonoBehaviour {
 		fuel = GetComponent<FuelScript> ();
 		rb = GetComponent<Rigidbody> ();
 		input = GetComponent<TeamAssignment> ();
+		stats = GetComponent<PlayerStats> ();
 
 
 
@@ -59,6 +61,7 @@ public class PivotScript : MonoBehaviour {
 	
 				health.vulnerable = false;
 				fuel.usingFuel = false;
+				rb.isKinematic = true;
 
 			}
 		} else {
@@ -68,6 +71,7 @@ public class PivotScript : MonoBehaviour {
 
 				health.vulnerable = false;
 				fuel.usingFuel = false;
+				rb.isKinematic = true;
 
 			}
 		}
@@ -76,12 +80,30 @@ public class PivotScript : MonoBehaviour {
 
 	void PlayerControl(){
 
-		if (!Input.anyKey){
-			health.vulnerable = false;
-			fuel.usingFuel = false;
-			EnableSwitching (true);
-			rb.isKinematic = false;
 
+		if (input.myTeam == TeamAssignment.Team.TEAM_A) {
+
+			foreach (string button in input.p1Inputs) {
+				if (!Input.GetButtonDown (button)) {
+					health.vulnerable = false;
+					fuel.usingFuel = false;
+
+					rb.isKinematic = false;
+					EnableSwitching (true);
+				}
+
+			}
+		} else {
+			foreach (string button in input.p2Inputs) {
+				if (!Input.GetButtonDown (button)) {
+					health.vulnerable = false;
+					fuel.usingFuel = false;
+
+					rb.isKinematic = false;
+					EnableSwitching (true);
+				}
+
+			}
 		}
 
 
@@ -98,12 +120,14 @@ public class PivotScript : MonoBehaviour {
 			EnableSwitching (false);
 			health.vulnerable = true;
 			fuel.usingFuel = true;
-			fuel.DepleteFueltoMove ();
+			fuel.DecreaseFuel (stats.moveFuelDepleteRate);
 		} 
 
 
 		if (Input.GetButtonDown(input.fire)) {
 			EnableSwitching (false);
+
+		
 		
 			rb.isKinematic = true;
 
@@ -118,6 +142,8 @@ public class PivotScript : MonoBehaviour {
 
 				print ("Bullet Velocity: " + velo);
 				bulletRB.isKinematic = true;
+
+				bullet.transform.localScale *= 2;
 
 				bullet.GetComponent<BulletScript>().released = false;
 				StartCoroutine ("ChargeProjectile", bullet.gameObject);
@@ -156,8 +182,10 @@ public class PivotScript : MonoBehaviour {
 
 	void OnTriggerStay(Collider col){
 		if (col.gameObject.tag == "Wave") {
-			if (health.vulnerable) {
-				health.DecreaseHealth ();
+			if (playerNum != col.gameObject.GetComponent<WaveCollisionScript> ().playerNum) {
+				if (health.vulnerable) {
+					health.DecreaseHealth (stats.waveDamage);
+				}
 			}
 		}
 	}
@@ -167,7 +195,7 @@ public class PivotScript : MonoBehaviour {
 
 			fuel.usingFuel = true;
 			health.vulnerable = true;
-			fuel.DecreaseFuel ();
+			fuel.DecreaseFuel (stats.actionFuelDepleteRate);
 
 			if (multiplier < multiplierMax && fuel.Fuel > 0) {
 

@@ -8,9 +8,10 @@ public class CatchzoneScript : MonoBehaviour {
 	public bool isReady =false;
 	public Transform bullet;
 
-	public Image catchUI;
+	Image catchUI;
 
 	void Start(){
+		catchUI = GameObject.Find ("P1_CatchUI").GetComponent<Image>();
 		bullet = null;
 		catchUI.enabled = false;
 	}

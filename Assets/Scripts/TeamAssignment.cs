@@ -13,6 +13,9 @@ public class TeamAssignment : MonoBehaviour {
 
 	public Vector3 startPos;
 
+	public List <string> p1Inputs = new List<string>();
+	public List <string> p2Inputs = new List<string>();
+
 	// INPUT ASSIGNMENT //
 
 	public string horizontal, vertical, jump, fire, rStick, rStick2, cancel, move;
@@ -25,22 +28,55 @@ public class TeamAssignment : MonoBehaviour {
 
 		if (myTeam == Team.TEAM_A) {
 			horizontal = "P1_HORIZONTAL";
+			p1Inputs.Add (horizontal);
+
 			vertical = "P1_VERTICAL";
+			p1Inputs.Add (vertical);
+
 			jump = "P1_L2";
+			p1Inputs.Add (jump);
+
 			fire = "P1_R2";
+			p1Inputs.Add (fire);
+
 			rStick = "P1_RSTICK";
+			p1Inputs.Add (rStick);
+
 			rStick2 = "P1_RSTICK_2";
+			p1Inputs.Add (rStick2);
+
 			move = "P1_R2";
+			p1Inputs.Add (move);
+
 			cancel = "P1_R3";
+			p1Inputs.Add (cancel);
+
+
+
 		} else if (myTeam == Team.TEAM_B) {
 			horizontal = "P2_HORIZONTAL";
+			p2Inputs.Add (horizontal);
+
 			vertical = "P2_VERTICAL";
+			p2Inputs.Add (vertical);
+
 			jump = "P2_L2";
+			p2Inputs.Add (jump);
+
 			fire = "P2_R2";
+			p2Inputs.Add (fire);
+
 			rStick = "P2_RSTICK";
+			p2Inputs.Add (rStick);
+
 			rStick2 = "P2_RSTICK_2";
-			move = "P2_R2";
+			p2Inputs.Add (rStick2);
+
+			move = "P2_R1";
+			p2Inputs.Add (move);
+
 			cancel = "P2_R3";
+			p2Inputs.Add (cancel);
 		}
 		
 	}

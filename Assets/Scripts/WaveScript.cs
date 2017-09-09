@@ -10,18 +10,22 @@ public class WaveScript : MonoBehaviour {
 
 	public int dirMod;
 
-	float offsetX = 2f;
+	float offsetX = 3f;
 
 
 	public float scaleMax, scaleMin;
 
 	float dist;
 
+	WaveCollisionScript [] waves;
+
 
 
 	void Start () {
 		
 		startPos = transform.position;
+
+		waves = GetComponentsInChildren<WaveCollisionScript> ();
 	}
 
 	void Update () {
@@ -32,7 +36,7 @@ public class WaveScript : MonoBehaviour {
 
 		transform.localScale = new Vector3 (sizeChange, transform.localScale.y, transform.localScale.z);
 
-		Vector3 finalPos = new Vector3 (targetPos.x + offsetX * dirMod, targetPos.y, targetPos.z);
+		Vector3 finalPos = new Vector3 (targetPos.x + offsetX * dirMod, targetPos.y - 1f, targetPos.z);
 
 //		print (dist);
 		transform.position = Vector3.MoveTowards (transform.position, finalPos , Time.deltaTime * speed);
@@ -40,6 +44,8 @@ public class WaveScript : MonoBehaviour {
 		// x += (target.position - x ) * 0.1f
 
 //		transform.position += (target.transform.position - transform.position) * 0.1f * Time.deltaTime;
+
+	
 
 	}
 
@@ -49,6 +55,8 @@ public class WaveScript : MonoBehaviour {
 			Destroy (gameObject);
 		}
 	}
+
+
 
 
 }

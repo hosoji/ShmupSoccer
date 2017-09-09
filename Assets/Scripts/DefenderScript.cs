@@ -31,6 +31,7 @@ public class DefenderScript : MonoBehaviour {
 	HealthScript health;
 	FuelScript fuel;
 	TeamAssignment input;
+	PlayerStats stats;
 
 	public int playerNum;
 
@@ -40,6 +41,7 @@ public class DefenderScript : MonoBehaviour {
 	void Start () {
 		health = GetComponent<HealthScript> ();
 		fuel = GetComponent<FuelScript> ();
+		stats = GetComponent<PlayerStats> ();
 
 		rb = GetComponent<Rigidbody> ();
 		input = GetComponent<TeamAssignment> ();
@@ -59,18 +61,22 @@ public class DefenderScript : MonoBehaviour {
 
 			if (TeamManager.p1DefenderActive) {
 				PlayerControl ();
+				rb.isKinematic = false;
 			} else {
 				//			Debug.Log ("Striker not active");
 				health.vulnerable = false;
 				fuel.usingFuel = false;
+				rb.isKinematic = true;
 
 			}
 		} else {
 			if (TeamManager.p2DefenderActive) {
 				PlayerControl ();
+				rb.isKinematic = false;
 			} else {
 				health.vulnerable = false;
 				fuel.usingFuel = false;
+				rb.isKinematic = true;
 
 			}
 		}
@@ -81,43 +87,72 @@ public class DefenderScript : MonoBehaviour {
 
 
 
-		if (!Input.anyKey){
-			if (!hasJumped) {
-				health.vulnerable = false;
+		if (input.myTeam == TeamAssignment.Team.TEAM_A) {
+
+			foreach (string button in input.p1Inputs) {
+				if (!Input.GetButtonDown (button)) {
+					if (!hasJumped) {
+						health.vulnerable = false;
+					}
+					fuel.usingFuel = false;
+
+					EnableSwitching (true);
+		
+				}
+
 			}
-			fuel.usingFuel = false;
+		} else {
+			foreach (string button in input.p2Inputs) {
+				if (!Input.GetButtonDown (button)) {
+					if (!hasJumped) {
+						health.vulnerable = false;
+					}
+					fuel.usingFuel = false;
 
-			EnableSwitching (true);
+					EnableSwitching (true);
+			
+				}
 
+			}
 		}
+
 			
 
 		float controllerVertical = Input.GetAxis (input.vertical);
 		float controllerHorizontal = Input.GetAxis (input.horizontal);
+		float rstickVertical = Input.GetAxis (input.rStick);
+		float rstickHorizontal = Input.GetAxis (input.rStick2);
 
-		if (controllerVertical != 0 || controllerHorizontal != 0) {
+
+
+//		if (controllerVertical != 0 || controllerHorizontal != 0) {
+//			health.vulnerable = true;
+//		} 
+
+
+		if (!Input.GetButton (input.jump)) {
+			
+			float angle = Mathf.Atan2(rstickHorizontal, rstickVertical) * Mathf.Rad2Deg; 
+
+//			transform.rotation = Quaternion.Euler(new Vector3(0, angle, 0));
+			transform.RotateAround(transform.position, transform.up, angle * Time.deltaTime);
+//			transform.Rotate (0f, angle * Time.deltaTime, 0f);
+		}
+
+		if (controllerVertical != 0) {
 			health.vulnerable = true;
-		} 
-
-		transform.Rotate (0f, controllerHorizontal * Time.deltaTime * rotationSpeed, 0f);
-
-		if (Input.GetButton (input.move)) {
-
-			health.vulnerable = true;
-
 
 			EnableSwitching (false);
-			
+
 			if (fuel.Fuel > 0) {
 				fuel.usingFuel = true;
-				rb.AddForce (transform.forward * Time.deltaTime * speed, ForceMode.Force);
-				fuel.DepleteFueltoMove ();
+				rb.AddForce (transform.forward * Time.deltaTime * speed * controllerVertical, ForceMode.Force);
+				fuel.DecreaseFuel(stats.moveFuelDepleteRate);
 
 			}
 
 		}
-
-
+			
 
 		if (Input.GetButton (input.jump)) {
 	
@@ -217,7 +252,7 @@ public class DefenderScript : MonoBehaviour {
 		float t = 0;
 
 		while ( t<1){
-			fuel.DecreaseFuel ();
+			fuel.DecreaseFuel (stats.actionFuelDepleteRate);
 			health.vulnerable = true;
 
 
@@ -237,13 +272,15 @@ public class DefenderScript : MonoBehaviour {
 
 	}
 
-	void OnTriggerStay(Collider col){
-		if (col.gameObject.tag == "Wave") {
-			if (health.vulnerable) {
-				health.DecreaseHealth ();
-			}
-		}
-	}
+//	void OnTriggerStay(Collider col){
+//		if (col.gameObject.tag == "Wave") {
+//			if (playerNum != col.gameObject.GetComponent<WaveCollisionScript> ().playerNum) {
+//				if (health.vulnerable) {
+//					health.DecreaseHealth (stats.waveDamage);
+//				}
+//			}
+//		}
+//	}
 
 	void EnableSwitching ( bool b){
 		if (playerNum ==1 ) {

@@ -8,13 +8,15 @@ public class FuelScript : MonoBehaviour {
 
 	public bool usingFuel = false;
 
-	public float maxFuel;
+	PlayerStats stats;
+
+//	public float maxFuel;
 
 	private float fuel;
 
-	public float regenRate;
-	public float depletionRate;
-	public float movingDepletionRate;
+//	public float regenRate;
+//	public float depletionRate;
+//	public float movingDepletionRate;
 
 	public Text fuelText;
 
@@ -29,8 +31,8 @@ public class FuelScript : MonoBehaviour {
 		set {
 			fuel = value;
 
-			if (fuel >= maxFuel) {
-				fuel = maxFuel;
+			if (fuel >= stats.maxFuel) {
+				fuel = stats.maxFuel;
 			} else if (fuel <= 0) {
 				fuel = 0;
 			}
@@ -40,12 +42,13 @@ public class FuelScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		fuel = maxFuel;
+		stats = GetComponent<PlayerStats> ();
+		fuel = GetComponent<PlayerStats> ().maxFuel;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		float fuelFill = Util.remapRange (fuel, 0, maxFuel, 0, 1);
+		float fuelFill = Util.remapRange (fuel, 0, stats.maxFuel, 0, 1);
 
 		fuelUI.fillAmount = fuelFill;
 
@@ -53,9 +56,9 @@ public class FuelScript : MonoBehaviour {
 
 
 
-		if (fuel < maxFuel) {
+		if (fuel < stats.maxFuel) {
 			if (!usingFuel) {
-				Fuel = fuel + regenRate;
+				Fuel = fuel + stats.fuelRegenRate;
 			}
 		}
 
@@ -63,17 +66,17 @@ public class FuelScript : MonoBehaviour {
 	}
 
 
-	public void DecreaseFuel(){
+	public void DecreaseFuel(float rate){
 		if (fuel > 0) {
-			Fuel = fuel - depletionRate * Time.deltaTime;
+			Fuel = fuel - rate * Time.deltaTime;
 		}
 	}
 
-	public void DepleteFueltoMove(){
-		if (fuel > 0) {
-			Fuel = fuel - movingDepletionRate * Time.deltaTime;
-		}
-	}
+//	public void DepleteFueltoMove(){
+//		if (fuel > 0) {
+//			Fuel = fuel - movingDepletionRate * Time.deltaTime;
+//		}
+//	}
 		
 
 

@@ -28,21 +28,33 @@ public class GoalScript : MonoBehaviour {
 		if (col.gameObject.tag == "Bullet") {
 			
 			points = col.gameObject.GetComponent<BulletScript> ().bulletPower * 0.01f;
-			ScreenShakeScript.shakeStrength = points * 0.5f;
+			ScreenShakeScript.shakeStrength = points * 0.2f;
 
 			if (myTeam == Team.TEAM_A_GOAL) {
 				if (col.gameObject.GetComponent<BulletScript> ().playerNum == 1) {
-					ScoreManager.p2Score += points; 
+					ScoreManager.p1Score -= points;
+					col.gameObject.GetComponent<BulletScript> ().ResetProjectileStatus ();
+					DestroyBullet (col.gameObject);
 				} else {
-					ScoreManager.p1Score += points; 
+					ScoreManager.p2Score += points;
+					col.gameObject.GetComponent<BulletScript> ().ResetProjectileStatus ();
+					DestroyBullet (col.gameObject);
 				}
 			} else {
 				if (col.gameObject.GetComponent<BulletScript> ().playerNum == 2) {
-					ScoreManager.p1Score += points; 
+					ScoreManager.p2Score -= points; 
+					col.gameObject.GetComponent<BulletScript> ().ResetProjectileStatus ();
+					DestroyBullet (col.gameObject);
 				} else {
-					ScoreManager.p2Score += points; 
+					ScoreManager.p1Score += points; 
+					col.gameObject.GetComponent<BulletScript> ().ResetProjectileStatus ();
+					DestroyBullet (col.gameObject);
 				}
 			}
 		}
+	}
+
+	void DestroyBullet(GameObject bullet){
+		Destroy (bullet);
 	}
 }

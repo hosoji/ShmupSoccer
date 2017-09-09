@@ -11,7 +11,8 @@ public class TeamManager : MonoBehaviour {
 	public static bool p1CanSwitch = true;
 	public static bool p2CanSwitch = true;
 
-	public Canvas p1StrikerUI, p1DefenderUI, p1PivotUI, p2StrikerUI, p2DefenderUI, p2PivotUI;
+	public Canvas p1StrikerUI , p1PivotUI, p2StrikerUI, p2PivotUI;
+//	public Canvas p2DefenderUI, p1DefenderUI;
 
 	public List <GameObject> p1Units = new List <GameObject>();
 	public List <GameObject> p2Units = new List <GameObject>();
@@ -36,22 +37,54 @@ public class TeamManager : MonoBehaviour {
 	}
 
 	void P1SwitchUnits(){
-//		print (p1selectedUnit.name);
-		if (Input.GetButtonDown (p1SwitchLeft)) {
-			if (p1Num > 0) {
-				p1Num--;
-			} else {
-				p1Num = p1Units.Count - 1;
-			}
-		}
 
-		if (Input.GetButtonDown (p1SwitchRight)) {
-			if (p1Num < p1Units.Count-1) {
-				p1Num++;
-			} else {
+		if (Input.GetButtonDown (p1SwitchLeft) || Input.GetButtonDown(p1SwitchRight)) {
+			if (p1Num == 0) {
+				p1Num = p1Units.Count - 1;
+			} 
+			else  if (p1Num == p1Units.Count - 1){
 				p1Num = 0;
 			}
 		}
+
+
+//		print (p1selectedUnit.name);
+//		if (Input.GetButtonDown (p1SwitchLeft)) {
+//			if (p1Num > 0) {
+//				p1Num--;
+//			} 
+//			else {
+//				p1Num = p1Units.Count - 1;
+//			}
+//		}
+//
+//		if (Input.GetButtonDown (p1SwitchRight)) {
+//			if (p1Num < p1Units.Count-1) {
+//				p1Num++;
+//			}
+//			else {
+//				p1Num = 0;
+//			}
+//		}
+//
+//		if (Input.GetButtonDown (p1SwitchLeft)) {
+//			if (p1Num == 1) {
+//				p1Num-- ;
+//			} 
+//			else if (p1Num == 0){
+//				p1Num++ ;
+//			}
+//		}
+
+//		if (Input.GetButtonDown (p1SwitchRight)) {
+//			if (p1Num < p1Units.Count-1) {
+//				p1Num++;
+//			}
+//			else {
+//				p1Num = 0;
+//			}
+//		}
+//
 
 
 		if (p1selectedUnit == p1Units [0]) {
@@ -61,7 +94,7 @@ public class TeamManager : MonoBehaviour {
 				p1PivotActive = false;
 
 				p1StrikerUI.enabled = true;
-				p1DefenderUI.enabled = false;
+//				p1DefenderUI.enabled = false;
 				p1PivotUI.enabled = false;
 			} else {
 				p1Num++;
@@ -69,31 +102,31 @@ public class TeamManager : MonoBehaviour {
 			}
 		}
 
+//		if (p1selectedUnit == p1Units [2]) {
+//			if (p1Units [2].activeInHierarchy) {
+//				p1StrikerActive = false;
+//				if (!WaveGenerator.teamAGeneratorActive) {
+//					p1DefenderActive = true;
+//				}
+//				p1PivotActive = false;
+//
+//				p1StrikerUI.enabled = false;
+////				p1DefenderUI.enabled = true;
+//				p1PivotUI.enabled = false;
+//			}else {
+//				p1Num++;
+//	
+//			}
+//		}
+
 		if (p1selectedUnit == p1Units [1]) {
 			if (p1Units [1].activeInHierarchy) {
-				p1StrikerActive = false;
-				if (!WaveGenerator.teamAGeneratorActive) {
-					p1DefenderActive = true;
-				}
-				p1PivotActive = false;
-
-				p1StrikerUI.enabled = false;
-				p1DefenderUI.enabled = true;
-				p1PivotUI.enabled = false;
-			}else {
-				p1Num++;
-	
-			}
-		}
-
-		if (p1selectedUnit == p1Units [2]) {
-			if (p1Units [2].activeInHierarchy) {
 				p1StrikerActive = false;
 				p1DefenderActive = false;
 				p1PivotActive = true;
 
 				p1StrikerUI.enabled = false;
-				p1DefenderUI.enabled = false;
+//				p1DefenderUI.enabled = false;
 				p1PivotUI.enabled = true;
 			}else {
 				p1Num--;
@@ -127,7 +160,7 @@ public class TeamManager : MonoBehaviour {
 				p2PivotActive = false;
 
 				p2StrikerUI.enabled = true;
-				p2DefenderUI.enabled = false;
+//				p2DefenderUI.enabled = false;
 				p2PivotUI.enabled = false;
 			} else {
 				p2Num++;
@@ -135,31 +168,31 @@ public class TeamManager : MonoBehaviour {
 			}
 		}
 
+//		if (p2selectedUnit == p2Units [2]) {
+//			if (p2Units [2].activeInHierarchy) {
+//				p2StrikerActive = false;
+//				if (!WaveGenerator.teamBGeneratorActive) {
+//					p2DefenderActive = true;
+//				}
+//				p2PivotActive = false;
+//
+//				p2StrikerUI.enabled = false;
+////				p2DefenderUI.enabled = true;
+//				p2PivotUI.enabled = false;
+//			}else {
+//				p2Num++;
+//
+//			}
+//		}
+
 		if (p2selectedUnit == p2Units [1]) {
 			if (p2Units [1].activeInHierarchy) {
-				p2StrikerActive = false;
-				if (!WaveGenerator.teamBGeneratorActive) {
-					p2DefenderActive = true;
-				}
-				p2PivotActive = false;
-
-				p2StrikerUI.enabled = false;
-				p2DefenderUI.enabled = true;
-				p2PivotUI.enabled = false;
-			}else {
-				p2Num++;
-
-			}
-		}
-
-		if (p2selectedUnit == p2Units [2]) {
-			if (p2Units [2].activeInHierarchy) {
 				p2StrikerActive = false;
 				p2DefenderActive = false;
 				p2PivotActive = true;
 
 				p2StrikerUI.enabled = false;
-				p2DefenderUI.enabled = false;
+//				p2DefenderUI.enabled = false;
 				p2PivotUI.enabled = true;
 			}else {
 				p2Num--;

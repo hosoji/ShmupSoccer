@@ -6,11 +6,12 @@ public class StrikerScript : MonoBehaviour {
 
 
 
-	public float speed = 10f;
+	public float currentSpeed;
 	public float defaultSpeed; 
 	public float slowDownMod = 10f;
 
 	public float jumpSpeed = 1f;
+
 	public float maxRotationLeft;
 	public float maxRotationRight;
 	[SerializeField] float defaultRotation;
@@ -19,12 +20,17 @@ public class StrikerScript : MonoBehaviour {
 
 	public int playerNum;
 
+//	Rigidbody rb;
+//
+
+
 
 //	float snapBackMod = 6f;
 
 	HealthScript health;
 	FuelScript fuel;
 	TeamAssignment input;
+	PlayerStats stats;
 
 
 
@@ -37,10 +43,12 @@ public class StrikerScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		stats = GetComponent<PlayerStats> ();
 		health = GetComponent<HealthScript> ();
 		fuel = GetComponent<FuelScript> ();
-		speed = defaultSpeed;
+		currentSpeed = defaultSpeed;
 		input = GetComponent<TeamAssignment> ();
+//		rb = GetComponent<Rigidbody> ();
 
 
 
@@ -53,13 +61,12 @@ public class StrikerScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-
 		if (playerNum == 1) {
 
 			if (TeamManager.p1StrikerActive) {
 				PlayerControl ();
 			} else {
-//			Debug.Log ("Striker not active");
+
 				health.vulnerable = false;
 				fuel.usingFuel = false;
 
@@ -68,35 +75,77 @@ public class StrikerScript : MonoBehaviour {
 			if (TeamManager.p2StrikerActive) {
 				PlayerControl ();
 			} else {
-				Debug.Log ("Striker 2 not active");
 				health.vulnerable = false;
 				fuel.usingFuel = false;
 
 			}
 		}
-		
+
 	}
 
 	void PlayerControl(){
 
 
+		if (input.myTeam == TeamAssignment.Team.TEAM_A) {
 
-		if (!Input.anyKey){
-			health.vulnerable = false;
-			fuel.usingFuel = false;
+			foreach (string button in input.p1Inputs) {
+				if (!Input.GetButton (button)) {
+					health.vulnerable = false;
+					fuel.usingFuel = false;
+//					rb.isKinematic = true;
 
-			EnableSwitching (true);
+
+					EnableSwitching (true);
+				} else {
+					health.vulnerable = true;
+					fuel.usingFuel = true;
+//					rb.isKinematic = false;
+//
+
+					EnableSwitching (false);
+					break;
+				}
+
+			}
+
+
+		} else if (input.myTeam == TeamAssignment.Team.TEAM_B)  {
+			foreach (string button in input.p2Inputs) {
+				if (!Input.GetButton (button)) {
+					health.vulnerable = false;
+					fuel.usingFuel = false;
+//					rb.isKinematic = true;
+
+
+					EnableSwitching (true);
+				} else {
+					health.vulnerable = true;
+					fuel.usingFuel = true;
+//					rb.isKinematic = false;
+
+
+					EnableSwitching (false);
+					break;
+				}
+
+			}
 		}
 
 
 		float controllerVertical = Input.GetAxis (input.vertical);
 		float controllerHorizontal = Input.GetAxis (input.horizontal);
 
-		float horizontalPos = transform.position.x + controllerHorizontal * Time.deltaTime * speed;
-		float verticalPos = transform.position.z + controllerVertical * Time.deltaTime * speed;
+		float horizontalPos = transform.position.x + controllerHorizontal * Time.deltaTime * currentSpeed;
+		float verticalPos = transform.position.z + controllerVertical * Time.deltaTime * currentSpeed;
+
+
 
 		if (fuel.Fuel > 0) {
 			transform.position = new Vector3 (horizontalPos, transform.position.y, verticalPos);
+
+			Vector3 movement = new Vector3 (controllerHorizontal, 0f, controllerVertical);
+
+//			rb.AddForce (movement * currentSpeed * Time.deltaTime * 10f, ForceMode.Impulse);
 		}
 
 		if (controllerVertical != 0 || controllerHorizontal != 0) {
@@ -104,8 +153,9 @@ public class StrikerScript : MonoBehaviour {
 			fuel.usingFuel = true;
 
 			EnableSwitching (false);
+//			rb.isKinematic = false;
 
-			fuel.DepleteFueltoMove ();
+			fuel.DecreaseFuel(stats.moveFuelDepleteRate);
 		} 
 
 //
@@ -129,7 +179,7 @@ public class StrikerScript : MonoBehaviour {
 
 			health.vulnerable = true;
 			fuel.usingFuel = true;
-			fuel.DecreaseFuel ();
+			fuel.DecreaseFuel (stats.actionFuelDepleteRate);
 			EnableSwitching (false);
 
 			float elevation = transform.position.y + 1f * Time.deltaTime * jumpSpeed;
@@ -170,15 +220,16 @@ public class StrikerScript : MonoBehaviour {
 		}
 
 		if (Input.GetButtonDown(input.fire)){
-			
-			fuel.usingFuel = true;
+
 
 			if (!projectileExist) {
 				if (fuel.Fuel > 0) {
+					
 
-					bulletInstance = Instantiate (projectile, transform.position + transform.forward, Quaternion.identity, transform);
+					bulletInstance = Instantiate (projectile, transform.position + transform.forward * 2f, Quaternion.identity, transform);
 					bulletInstance.GetComponent<BulletScript>().released = false;
 					bulletInstance.GetComponent<BulletScript>().playerNum = playerNum;
+					bulletInstance.GetComponent<Collider> ().enabled = false;
 
 					StartCoroutine ("ChargeProjectile", bulletInstance);
 					projectileExist = true;
@@ -187,15 +238,20 @@ public class StrikerScript : MonoBehaviour {
 
 		}
 
-		if (Input.GetButtonUp (input.fire) || fuel.Fuel == 0) {
+		if (Input.GetButtonUp (input.fire)) {
 			EnableSwitching (true);
-			fuel.usingFuel = false;
-			speed = defaultSpeed;
+//			fuel.usingFuel = false;
+			currentSpeed = defaultSpeed;
 			if (bulletInstance != null && bulletInstance.GetComponent<BulletScript>().released == false) {
+				bulletInstance.GetComponent<Collider> ().enabled = true;
 				Rigidbody rb = bulletInstance.GetComponent<Rigidbody> ();
+				rb.isKinematic = false;
 				rb.AddForce (transform.forward * projectilePower * Time.deltaTime * 100f, ForceMode.Impulse);
 				bulletInstance.transform.parent = null;
+
+
 				bulletInstance.GetComponent<BulletScript>().released = true;
+
 			}
 		}
 
@@ -239,26 +295,35 @@ public class StrikerScript : MonoBehaviour {
 
 	void OnTriggerStay(Collider col){
 		if (col.gameObject.tag == "Wave") {
-			if (health.vulnerable) {
-				health.DecreaseHealth ();
+			if (playerNum != col.gameObject.GetComponent<WaveCollisionScript> ().playerNum) {
+				if (health.vulnerable) {
+					health.DecreaseHealth (stats.waveDamage);
+				}
 			}
 		}
 	}
 
 	IEnumerator ChargeProjectile(GameObject bullet){
+
+		fuel.usingFuel = true;
 		while (Input.GetButton (input.fire) == true ) {
+
+			bullet.GetComponent<Collider> ().enabled = false;
+			
 			health.vulnerable = true;
 			EnableSwitching (false);
-			fuel.DecreaseFuel ();
+
+			fuel.DecreaseFuel (stats.actionFuelDepleteRate);
 //			print ("true");
 			if (projectilePower < maxProjectilePower && fuel.Fuel > 0) {
 
 				if (!bulletInstance.GetComponent<BulletScript>().released) {
 					projectilePower += Time.deltaTime * 10f;
-					speed -= Time.deltaTime * slowDownMod;
+					currentSpeed -= Time.deltaTime * slowDownMod;
 //				print (projectilePower);
-					bullet.transform.localScale += new Vector3 (0.01f, 0.01f, 0.01f);
+//					bullet.transform.localScale += new Vector3 (0.01f, 0.01f, 0.01f);
 				}
+
 
 				yield return 0;
 			}

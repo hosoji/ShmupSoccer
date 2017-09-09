@@ -7,12 +7,12 @@ public class HealthScript : MonoBehaviour {
 
 	public bool vulnerable = false;
 
-	public float maxHealth;
-
 	private float health;
 
-	public float waveDamage;
-	public float regenRate;
+//	public float waveDamage;
+//	public float projectileDamage;
+
+	PlayerStats stats;
 
 	RespawnScript respawn;
 
@@ -25,8 +25,8 @@ public class HealthScript : MonoBehaviour {
 		set {
 			health = value;
 
-			if (health >= maxHealth) {
-				health = maxHealth;
+			if (health >= stats.maxHealth) {
+				health = stats.maxHealth;
 			} else if (health <= 0) {
 				health = 0;
 			}
@@ -38,21 +38,22 @@ public class HealthScript : MonoBehaviour {
 	public Image healthUI;
 
 	void Start () {
-		health = maxHealth;
+		stats = GetComponent<PlayerStats> ();
+		health = GetComponent<PlayerStats> ().maxHealth;
 		respawn = GameObject.FindGameObjectWithTag("GameManager").GetComponent<RespawnScript> ();
 	}
 	
 
 	void Update () {
-		float healthFill = Util.remapRange (health, 0, maxHealth, 0, 1);
+		float healthFill = Util.remapRange (health, 0, stats.maxHealth, 0, 1);
 
 		healthUI.fillAmount = healthFill;
 
 		healthText.text = Health.ToString ("#00.0");
 
-		if (health < maxHealth) {
+		if (health < stats.maxHealth && health > 0) {
 			if (!vulnerable) {
-				Health = health + regenRate;
+				Health = health + stats.healthRegenRate;
 			}
 		}
 
@@ -68,24 +69,28 @@ public class HealthScript : MonoBehaviour {
 				TeamManager.p2CanSwitch = true;
 			}
 
-			health = maxHealth;
+			health = stats.maxHealth;
 		}
 
 	}
 
 
-	public void DecreaseHealth(){
+	public void DecreaseHealth(float rate){
 		if (health > 0) {
-			Health = health - waveDamage * Time.deltaTime;
+			Health = health - rate * Time.deltaTime;
+		} else {
+			respawn.RespawnPlayer (gameObject);
 		}
 	}
 
 
 	void OnTriggerStay (Collider col){
-		if (col.gameObject.tag == "Wall") {
-			Health = health - waveDamage * Time.deltaTime;
+		if (col.gameObject.tag == "Wall" || col.gameObject.tag == "DamageArea") {
+			DecreaseHealth (stats.outOfBoundsDamage);
 		}
 	}
+
+
 
 
 }
