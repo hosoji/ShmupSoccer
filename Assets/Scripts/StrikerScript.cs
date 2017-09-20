@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class StrikerScript : MonoBehaviour {
 
+	Ray ray;
 
 
 	public float currentSpeed;
@@ -50,6 +51,8 @@ public class StrikerScript : MonoBehaviour {
 		input = GetComponent<TeamAssignment> ();
 //		rb = GetComponent<Rigidbody> ();
 
+		ray = new Ray (transform.position, transform.forward);
+
 
 
 		if (input.myTeam == TeamAssignment.Team.TEAM_A) {
@@ -61,6 +64,8 @@ public class StrikerScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+//		Debug.DrawRay (transform.position, transform.forward * 30f, Color.yellow);
+
 		if (playerNum == 1) {
 
 			if (TeamManager.p1StrikerActive) {
@@ -175,7 +180,7 @@ public class StrikerScript : MonoBehaviour {
 
 
 
-		if (Input.GetButton (input.jump)) {
+		if (Input.GetButton (input.rewind)) {
 
 			health.vulnerable = true;
 			fuel.usingFuel = true;
@@ -213,7 +218,7 @@ public class StrikerScript : MonoBehaviour {
 			}
 		}
 
-		if (Input.GetButtonUp (input.jump)) {
+		if (Input.GetButtonUp (input.rewind)) {
 			fuel.usingFuel = false;
 			EnableSwitching (true);
 
@@ -235,6 +240,8 @@ public class StrikerScript : MonoBehaviour {
 					projectileExist = true;
 				}
 			}
+
+
 
 		}
 

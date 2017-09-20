@@ -130,7 +130,7 @@ public class DefenderScript : MonoBehaviour {
 //		} 
 
 
-		if (!Input.GetButton (input.jump)) {
+		if (!Input.GetButton (input.rewind)) {
 			
 			float angle = Mathf.Atan2(rstickHorizontal, rstickVertical) * Mathf.Rad2Deg; 
 
@@ -154,7 +154,7 @@ public class DefenderScript : MonoBehaviour {
 		}
 			
 
-		if (Input.GetButton (input.jump)) {
+		if (Input.GetButton (input.rewind)) {
 	
 			
 			if (!isJumping && !hasJumped) {
@@ -209,7 +209,7 @@ public class DefenderScript : MonoBehaviour {
 			}
 		}
 
-		if (Input.GetButtonUp (input.jump)) {
+		if (Input.GetButtonUp (input.rewind)) {
 
 			if (!hasJumped) {
 				isJumping = false;

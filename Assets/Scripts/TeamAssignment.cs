@@ -18,7 +18,7 @@ public class TeamAssignment : MonoBehaviour {
 
 	// INPUT ASSIGNMENT //
 
-	public string horizontal, vertical, jump, fire, rStick, rStick2, cancel, move;
+	public string horizontal, vertical, fire, rStick, rStick2, cancel, move, recording, play, rewind;
 
 	// Use this for initialization
 	void Start () {
@@ -33,8 +33,8 @@ public class TeamAssignment : MonoBehaviour {
 			vertical = "P1_VERTICAL";
 			p1Inputs.Add (vertical);
 
-			jump = "P1_L2";
-			p1Inputs.Add (jump);
+			rewind = "P1_L2";
+			p1Inputs.Add (rewind);
 
 			fire = "P1_R2";
 			p1Inputs.Add (fire);
@@ -51,6 +51,12 @@ public class TeamAssignment : MonoBehaviour {
 			cancel = "P1_R3";
 			p1Inputs.Add (cancel);
 
+			recording = "P1_L1";
+			p1Inputs.Add (recording);
+
+			play = "P1_R1";
+			p1Inputs.Add (play);
+
 
 
 		} else if (myTeam == Team.TEAM_B) {
@@ -60,8 +66,8 @@ public class TeamAssignment : MonoBehaviour {
 			vertical = "P2_VERTICAL";
 			p2Inputs.Add (vertical);
 
-			jump = "P2_L2";
-			p2Inputs.Add (jump);
+			rewind = "P2_L2";
+			p2Inputs.Add (rewind);
 
 			fire = "P2_R2";
 			p2Inputs.Add (fire);
@@ -77,6 +83,12 @@ public class TeamAssignment : MonoBehaviour {
 
 			cancel = "P2_R3";
 			p2Inputs.Add (cancel);
+
+			recording = "P2_L1";
+			p1Inputs.Add (recording);
+
+			play = "P2_R1";
+			p1Inputs.Add (play);
 		}
 		
 	}
