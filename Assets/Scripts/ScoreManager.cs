@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class ScoreManager : MonoBehaviour {
 
+
+
 	public Text p1ScoreText;
 	public Text p2ScoreText;
 
@@ -20,8 +22,8 @@ public class ScoreManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		p1ScoreText.text = p1Score.ToString("#00.0");
-		p2ScoreText.text = p2Score.ToString("#00.0");
+		p1ScoreText.text = p1Score.ToString();
+		p2ScoreText.text = p2Score.ToString();
 		
 	}
 }

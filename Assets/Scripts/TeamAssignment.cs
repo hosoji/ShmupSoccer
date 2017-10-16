@@ -18,7 +18,7 @@ public class TeamAssignment : MonoBehaviour {
 
 	// INPUT ASSIGNMENT //
 
-	public string horizontal, vertical, fire, rStick, rStick2, cancel, move, recording, play, rewind;
+	public string horizontal, vertical, fire, rStick, rStick2, cancel, move, recording, play, rewind, block;
 
 	// Use this for initialization
 	void Start () {
@@ -36,7 +36,7 @@ public class TeamAssignment : MonoBehaviour {
 			rewind = "P1_L2";
 			p1Inputs.Add (rewind);
 
-			fire = "P1_R2";
+			fire = "P1_CROSS";
 			p1Inputs.Add (fire);
 
 			rStick = "P1_RSTICK";
@@ -57,6 +57,10 @@ public class TeamAssignment : MonoBehaviour {
 			play = "P1_R1";
 			p1Inputs.Add (play);
 
+			block = "P1_SQUARE";
+			p1Inputs.Add (block);
+
+
 
 
 		} else if (myTeam == Team.TEAM_B) {
@@ -69,7 +73,7 @@ public class TeamAssignment : MonoBehaviour {
 			rewind = "P2_L2";
 			p2Inputs.Add (rewind);
 
-			fire = "P2_R2";
+			fire = "P2_CROSS";
 			p2Inputs.Add (fire);
 
 			rStick = "P2_RSTICK";
@@ -89,12 +93,12 @@ public class TeamAssignment : MonoBehaviour {
 
 			play = "P2_R1";
 			p1Inputs.Add (play);
+
+			block = "P2_SQUARE";
+			p2Inputs.Add (block);
 		}
 		
 	}
 	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
 }

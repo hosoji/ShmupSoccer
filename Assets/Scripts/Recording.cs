@@ -6,58 +6,104 @@ using UnityEngine.UI;
 public class Recording : MonoBehaviour {
 
 	public List<Vector3> recPos = new List <Vector3> ();
-	List<Vector3> recRot = new List <Vector3> ();
-	List<bool> recButton = new List <bool> ();
+	public List<Vector3> recRot = new List <Vector3> ();
+	public List<bool> recButton = new List <bool> ();
+	public List <bool> recDefense = new List<bool> ();
 
-	Keyframes key;
+	List <int> moveDirections = new List<int> ();
+
+
+	int lastPositionX = 0;
+	int lastPositionY = 0;
+
+	int firstDir, secondDir, thirdDir;
+
+
 	Vector3 lastPos;
 	Vector3 currentPos;
 
-	LineRenderer lr;
+	public LineRenderer lr;
 	public Material mat;
 
-	Vector3 nextPos;
-	Vector3 nextRot;
+	public Vector3 nextPos;
+	public Vector3 nextRot;
 
-	bool isPressed;
-	bool nextButton;
-	bool isPlaying = false;
+	public bool isPressed;
+	public bool nextButton;
 	 
-	int rotIndex = 0;
-	int posIndex = 0;
-	int buttonIndex = 0;
+	public int rotIndex = 0;
+	public int posIndex = 0;
+	public int buttonIndex = 0;
 
-	public float maxRecTime = 30f;
+//	public float maxRecTime = 30f;
 	float maxplayTime = 0f;
-	float recTime =0f;
-	float playTime = 0f;
+	public float  recTime = 0f;
+	public float playTime = 0f;
 	float recButtonStart = 0f;
 	float recButtonEnd = 0f;
 	float playButtonStart = 0f;
 	float playButtonEnd = 0f;
 
-	float t = 0;
-	float r = 0;
-	float b = 0;
-
-	public float playbackSpeed = 0.02f;
-
-	AttackingUnit player;
+	GameManager gameManager;
+	MainPlayer player;
 	TeamAssignment input;
+	PlayerStats stats;
+	KeyframeScript key;
+	Playback play;
+//
+//	public Image recUI, playUI;
+	public Text segmentText;
 
-	public Image rec, play;
+	public int maxSegments;
+	public bool segmentRemoved = false;
 
-	void Start(){
+	[SerializeField] private int segments;
+	public int Segments{
+		get { return segments; }
+		private set
+		{
+			segments = value;
+			if(segments <= 0)
+			{
+				segments = 0;
+			}
+			else if (segments > maxSegments)
+			{
+				segments = maxSegments;
+			}
+		}
+	}
 
+	private int moveCount = 0;
+	public int MoveCount{
+		get { return moveCount; }
+		private set
+		{
+			moveCount = value;
+			if(moveCount <= 0)
+			{
+				moveCount = 0;
+			}
+			else if (moveCount > 3)
+			{
+				moveCount = 0;
+			}
+		}
+	}
 
-		player = GetComponent<AttackingUnit> ();
+	void Awake(){
+		
+		player = GetComponent<MainPlayer> ();
 		input = GetComponent<TeamAssignment> ();
-		key = GetComponent<Keyframes> ();
-		player.enabled = false;
+		key = GetComponent<KeyframeScript> ();
+		stats = GetComponent<PlayerStats> ();
+		play = GetComponent<Playback> ();
 
+		gameManager = GameObject.Find ("[GameManager]").GetComponent<GameManager> ();
+	
 
-		rec.enabled = false;
-		play.enabled = false;
+//		recUI.enabled = false;
+//		playUI.enabled = false;
 
 
 		// Set up Line Renderer 
@@ -72,240 +118,132 @@ public class Recording : MonoBehaviour {
 
 	}
 
+	void Start(){
+		player.enabled = true;
+
+	
+		Segments = maxSegments;
+	}
+
 	void FixedUpdate () {
 		currentPos = transform.position;
 
-		RecordingPlayer ();
-		Playback ();
-//		Rewind ();
 
 	}
 
-//	// Using this for keyframes, remove if not required
-//	void LateUpdate(){
-//		
-//		if (currentPos != lastPos) {
-//			Vector3 dir = currentPos - lastPos;
-//		}
+	void Update(){
+//		RecordingPlayer ();
+		play.Play ();
+
+//		Debug.Log (gridPositionX.Count);
+
+
+		ClearPath ();
+
+		float recText = stats.maxRecTime - recTime;
+		segmentText.text = Segments.ToString () + "/" + maxSegments.ToString ();
+
+
+	}
+		
+
+
+//	public void RecordingPlayer(){
 //
-//		lastPos = currentPos;
-//	}
-
-
-
-	public void RecordingPlayer(){
-
-		float recAmount = maxRecTime - recTime;
-		float recFill = Util.remapRange (recAmount, maxRecTime, 0, 1, 0);
-		rec.fillAmount = recFill;
-
-
-		if (recAmount > 0) {
-
-			if (!isPlaying){
-
-				if (Input.GetButtonDown (input.recording)) {
-					key.KeyFrameAssignment (transform.position, false);
-				}
-
-				if (Input.GetButton (input.recording)) {
-					lr.enabled = true;
-					player.enabled = true;
-					rec.enabled = true;
-					recPos.Add (transform.position);
-					recRot.Add (transform.eulerAngles);
-					PathDrawing ();
-
-
-					if (!Input.GetButtonUp (input.fire)) {
-						recButton.Add (false);
-					}
-
-					if (Input.GetButtonDown (input.fire)) {
-						recButtonStart = recTime;
-
-					}
-					if (Input.GetButtonUp (input.fire)) {
-						recButtonEnd = recTime;
-						recButton.Add (true);
-
-						decimal duration = System.Math.Round ((decimal)(recButtonEnd - recButtonStart), 2);
-						print (duration);
-					}
-
-					recTime += Time.deltaTime;
-
-				}
-			}
-
-			if (Input.GetButtonUp (input.recording)) {
-				maxplayTime =  maxplayTime + recTime;
-
-				key.KeyFrameAssignment (transform.position, false);
-
-				recTime = 0;
-				player.enabled = false;
-				rec.enabled = false;
-			
-			}
-		} else {
-
-
-			player.enabled = false; 
-			rec.enabled = false;
-
-			if (Input.GetButtonUp (input.recording)) {
-				maxplayTime = maxplayTime + recTime;
-				key.KeyFrameAssignment (transform.position, false);
-				recTime = 0;
-			}
-		}
-	}
-
-
-
-	public void Playback(){
-
-//		Debug.Log ("Max playtime: " + maxplayTime);
-
-		float playAmount = maxplayTime - playTime;
-		float playFill = Util.remapRange (playAmount, maxplayTime, 0, 1, 0);
-
-		play.fillAmount = playFill;
-
-
-		// Replaying the Player Movement 
-		if (posIndex < recPos.Count) {
-
-			if (!Input.GetButton (input.recording)) {
-
-				if (Input.GetButtonDown (input.play)){
-					if (!isPlaying) {
-						isPlaying = true;
-					} else {
-						isPlaying = false;
-					}
-				}
-
-
-
-				if (isPlaying) {
-
-					nextPos = recPos [posIndex];
-					play.enabled = true;
-					rec.enabled = false;
-
-					playTime += Time.deltaTime;
-
-//					if (playTime >= recButtonStart && playTime <= recButtonEnd) {
-//						print ("Button is pressed");
+//		float recAmount = stats.maxRecTime - recTime;
+//		float recFill = Util.remapRange (recAmount, stats.maxRecTime, 0, 1, 0);
+////		recUI.fillAmount = recFill;
+//
+//
+//		if (recAmount > 0) {
+//
+//			if (!play.isPlaying){
+////
+////				if (Input.GetButtonDown (input.recording)) {
+////					key.KeyFrameAssignment (transform.position, false);
+////				}
+////
+//				if (Input.GetButton (input.recording)) {
+//					lr.enabled = true;
+//					player.enabled = true;
+////					recUI.enabled = true;
+//					recPos.Add (transform.position);
+//					recRot.Add (transform.eulerAngles);
+//					PathDrawing ();
+//					recTime += Time.deltaTime;
+//
+//
+////					if (!Input.GetButtonUp (input.fire)) {
+////						recButton.Add (false);
+////					}
+//
+//					if (Input.GetButtonDown (input.fire)) {
+//						recButtonStart = recTime;
+//
+//
 //					}
-					transform.position = nextPos;
-
-					if (transform.position == nextPos) {
-
-//						recPos.Remove (recPos [posIndex]);
-						posIndex++;
-
-						// Used to slow down incrementing
-//						t += Time.deltaTime;
-//						if (t >= playbackSpeed) { 
-//							posIndex++;
-//							t = 0;
-//							Debug.Log (posIndex);
+//					if (Input.GetButtonUp (input.fire)) {
+//
+//						if (!isPressed) {
+//							recButtonEnd = recTime;
+//							recButton.Add (true);
+//							key.ActionFrameAssignment (transform.position, true);
+//							isPressed = true;
 //						}
-					}
-				}
-			}
-
-		} else {
-//			recPos.Clear ();
-			posIndex = 0;
-			playTime = 0;
-			play.enabled = false;
-			isPlaying = false;
-
-		}
-
-		// Replaying the Player Rotation 
-
-		if (rotIndex < recRot.Count) {
-
-			if (isPlaying) {
-				nextRot = recRot [rotIndex];
-				transform.eulerAngles = nextRot;
-				if (transform.eulerAngles == nextRot) {
-//					recRot.Remove (recRot [rotIndex]);
-
-					// Used to slow down incrementing
-					r += Time.deltaTime;
-					if (r >= playbackSpeed) { 
-						rotIndex++;
-						r = 0;
-					}
-				}	
-			} 
-	
-		} else {
-//			recRot.Clear ();
-			rotIndex = 0;
-		}
-
-
-		// Replaying Player Actions
-
-		if (buttonIndex < recButton.Count) {
-
-			if (isPlaying) {
-				nextButton = recButton [buttonIndex];
-				bool action = nextButton;
-				if (action == true) {
-					player.PlayerAction ();
-				}
-				if (action == nextButton) {
-					
-//					recButton.Remove (recButton [buttonIndex]);
-
-					// Used to slow down incrementing
-					b += Time.deltaTime;
-					if (b >= playbackSpeed) { 
-						buttonIndex++;
-						b = 0;
-					}
-				}	
-			} 
-
-		} else {
-//			recButton.Clear ();
-			buttonIndex = 0;
-		}
-	}
 //
-//	void Rewind(){
+//						decimal duration = System.Math.Round ((decimal)(recButtonEnd - recButtonStart), 2);
+//						print (duration);
 //
-//		if (!Input.GetButton (input.recording)) {
+//					} else {
+//						recButton.Add (false);
+//						isPressed = false;
+//					}
 //
-//			if (Input.GetButton (input.rewind)) {
-//				Debug.Log ("Method called");
-//				posIndex = recPos.Count-1;
-//				isPlaying = false;
+//					// Places Blocks in Recording
 //
-//				nextPos = recPos [posIndex];
+//					if (Input.GetButtonUp (input.block)) {
 //
-//				t += Time.deltaTime;
-//				if (t >= playbackSpeed * 3f) { 
-//					posIndex--;
-//					t = 0;
+//						if (!isPressed) {
+//							key.ActionFrameAssignment (transform.position, false);
+//							isPressed = true;
+//						}
 //
-//					print (t);
+//					} else {
+//						
+//						isPressed = false;
+//					}
+//
+//				
 //				}
 //
+//				if (Input.GetButtonUp (input.recording)) {
+////					maxplayTime =  maxplayTime + recTime;
+//
+//					//				recTime = 0;
+//					player.enabled = false;
+////					recUI.enabled = false;
+//			}
+//
+//
+//			
+//			}
+//		} else {
+//
+//
+//			player.enabled = false; 
+////			recUI.enabled = false;
+//
+//			if (Input.GetButtonUp (input.recording) && !play.isPlaying) {
+//
+////				key.KeyFrameAssignment (transform.position, false);
+////				recTime = 0;
 //			}
 //		}
-//
 //	}
+		
 
-	void PathDrawing(){
+
+	public void PathDrawing(){
 
 		lr.positionCount = recPos.Count;
 
@@ -317,8 +255,153 @@ public class Recording : MonoBehaviour {
 		}
 	}
 
+	public void PathCheck(){
+
+		int dir = 0;
+		// { 1 Up, -1 Down, -2 Left, 2 Right }
+		
+		if (Mathf.Abs (key.GridPosition ().x - lastPositionX) == 1 && key.GridPosition ().y - lastPositionY == 0 ) {
+			
+
+			if (key.GridPosition ().x - lastPositionX > 0) {
+				Debug.Log ("Moved Right");
+				dir = 2;
+				MoveCount++;
+					
+			} else {
+				Debug.Log ("Moved Left");
+				dir = -2;
+				MoveCount++;
+			}
+			lastPositionX = key.GridPosition ().x;
+		}
+
+		if (Mathf.Abs (key.GridPosition ().y - lastPositionY) == 1 && key.GridPosition ().x - lastPositionX == 0) {
+
+			if (key.GridPosition ().y - lastPositionY > 0) {
+				Debug.Log ("Moved Up");
+				dir = 1;
+				MoveCount++;
+
+			} else {
+				Debug.Log ("Moved Down");
+				dir = -1;
+				MoveCount++;
+			}
+			lastPositionY = key.GridPosition ().y;
+		}
+
+		if (moveCount == 1) {
+			firstDir = dir;
+			Debug.Log (firstDir);
+		} else if (moveCount == 2) {
+
+			if (Mathf.Abs(firstDir) - Mathf.Abs(dir) == 0) {
+				MoveCount = 1;
+				firstDir = dir;
+			} else {
+				secondDir = dir;
+				Debug.Log (firstDir + " " + secondDir);
+			}
+
+
+		} else if (MoveCount == 3) {
+			thirdDir = dir;
+			Debug.Log (firstDir + " " + secondDir + " " + thirdDir);
+			MoveCount = 0;
+		}
+
+
+	}
+		
+
+
+	void ClearPath(){
+		if (!play.isPlaying && !Input.GetButton(input.recording)){
+			if (Input.GetButtonDown (input.cancel)) {
+				key.ClearKeyFrames ();
+//				gridPositionX.Clear ();
+//				gridPositionY.Clear ();
+
+
+				recPos.Clear ();
+				recButton.Clear ();
+				recRot.Clear ();
+				lr.enabled = false;
+		
+
+				recTime = 0;
+				player.ResetPlayerPos ();
+				ReplenishSegments ();
+
+//				key.KeyFrameAssignment ();
+//				gridPositionX.Add(key.GridPosition ().x);
+//				gridPositionY.Add(key.GridPosition ().y);
+				lastPositionX = 0;
+				lastPositionY = 0;
+				MoveCount = 0;
+
+			}
+		}
+	}
+
+	public void RecordAction(){
+		if (Input.GetButtonDown (input.fire)) {
+			if (!isPressed) {
+
+				if (key.KeyFrameDistanceCheck (transform.position)) {
+					recPos.Add (transform.position);
+					recButton.Add (true);
+					key.ActionFrameAssignment (transform.position, true);
+					isPressed = true;
+				}
+			}
+		}
+
+		if (Input.GetButtonDown (input.block)) {
+			if (!isPressed) {
+
+				if (key.KeyFrameDistanceCheck (transform.position)) {
+					recPos.Add (transform.position);
+					recDefense.Add (true);
+					key.ActionFrameAssignment (transform.position, false);
+					isPressed = true;
+				}
+			}
+
+		}
+	}
+		
+
+	public void UseSegments(){
+
+//		Debug.Log ("Being called");
+		Segments--;
+		segmentRemoved = true;
 
 		
+	}
+
+
+	public void SegmentCheck(Vector3 pos){
+		if (!key.areaNodes.Contains (pos)) {
+			if (!segmentRemoved && Segments > 0) {
+
+				UseSegments ();
+			} 
+		} else {
+			segmentRemoved = true;
+		}
+	
+	}
+
+
+	public void ReplenishSegments(){
+		Segments = maxSegments;
+		
+	}
+
+
 
 
 }

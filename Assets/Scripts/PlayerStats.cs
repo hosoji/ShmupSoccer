@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class PlayerStats : MonoBehaviour {
 
+	public float maxRecTime;
+
+	public int maxSegments;
 
 
 	public float maxHealth;
