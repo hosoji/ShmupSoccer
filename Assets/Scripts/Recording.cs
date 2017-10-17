@@ -10,7 +10,9 @@ public class Recording : MonoBehaviour {
 	public List<bool> recButton = new List <bool> ();
 	public List <bool> recDefense = new List<bool> ();
 
-	List <int> moveDirections = new List<int> ();
+	int [] moveDirections = new int [3] ;
+
+
 
 
 	int lastPositionX = 0;
@@ -116,6 +118,8 @@ public class Recording : MonoBehaviour {
 		lr.alignment = LineAlignment.View;
 		lr.textureMode = LineTextureMode.Tile;
 
+
+
 	}
 
 	void Start(){
@@ -123,6 +127,8 @@ public class Recording : MonoBehaviour {
 
 	
 		Segments = maxSegments;
+
+
 	}
 
 	void FixedUpdate () {
@@ -137,13 +143,17 @@ public class Recording : MonoBehaviour {
 
 //		Debug.Log (gridPositionX.Count);
 
+//		for (int i = 0; i < moveDirections.Length; i++) {
+//			print (moveDirections [i]);
+//		}
+//
 
 		ClearPath ();
 
 		float recText = stats.maxRecTime - recTime;
 		segmentText.text = Segments.ToString () + "/" + maxSegments.ToString ();
 
-
+	
 	}
 		
 
@@ -257,20 +267,22 @@ public class Recording : MonoBehaviour {
 
 	public void PathCheck(){
 
-		int dir = 0;
-		// { 1 Up, -1 Down, -2 Left, 2 Right }
+
+		int dir = 9;
 		
 		if (Mathf.Abs (key.GridPosition ().x - lastPositionX) == 1 && key.GridPosition ().y - lastPositionY == 0 ) {
 			
 
 			if (key.GridPosition ().x - lastPositionX > 0) {
-				Debug.Log ("Moved Right");
-				dir = 2;
+//				Debug.Log ("Moved Right");
+				dir = 1;
+				TrackMoves (dir);
 				MoveCount++;
 					
 			} else {
-				Debug.Log ("Moved Left");
-				dir = -2;
+//				Debug.Log ("Moved Left");
+				dir = -1;
+				TrackMoves (dir);
 				MoveCount++;
 			}
 			lastPositionX = key.GridPosition ().x;
@@ -279,39 +291,84 @@ public class Recording : MonoBehaviour {
 		if (Mathf.Abs (key.GridPosition ().y - lastPositionY) == 1 && key.GridPosition ().x - lastPositionX == 0) {
 
 			if (key.GridPosition ().y - lastPositionY > 0) {
-				Debug.Log ("Moved Up");
-				dir = 1;
+//				Debug.Log ("Moved Up");
+				dir = 2 ;
+				TrackMoves (dir);
 				MoveCount++;
 
 			} else {
-				Debug.Log ("Moved Down");
-				dir = -1;
+//				Debug.Log ("Moved Down");
+				dir = -2 ;
+				TrackMoves (dir);
 				MoveCount++;
 			}
 			lastPositionY = key.GridPosition ().y;
 		}
 
-		if (moveCount == 1) {
-			firstDir = dir;
-			Debug.Log (firstDir);
-		} else if (moveCount == 2) {
+		if (Mathf.Abs (key.GridPosition ().y - lastPositionY) == 1 &&  Mathf.Abs(key.GridPosition ().x - lastPositionX) == 1) {
 
-			if (Mathf.Abs(firstDir) - Mathf.Abs(dir) == 0) {
-				MoveCount = 1;
-				firstDir = dir;
+			if (key.GridPosition ().y - lastPositionY > 0 && key.GridPosition ().x - lastPositionX > 0) {
+				Debug.Log ("Moved UpRight");
+				dir = 3;
+				TrackMoves (dir);
+				MoveCount++;
+
+			} else if (key.GridPosition ().y - lastPositionY > 0 && key.GridPosition ().x - lastPositionX < 0) {
+				Debug.Log ("Moved UpLeft");
+				dir = -3 ;
+				TrackMoves (dir);
+				MoveCount++;
+
+			} else if (key.GridPosition ().y - lastPositionY < 0 && key.GridPosition ().x - lastPositionX > 0) {
+				Debug.Log ("Moved DownRight");
+				dir = 4;
+				TrackMoves (dir);
+				MoveCount++;
 			} else {
-				secondDir = dir;
-				Debug.Log (firstDir + " " + secondDir);
+				Debug.Log ("Moved DownLeft");
+				dir = -4;
+				TrackMoves (dir);
+				MoveCount++;
 			}
-
-
-		} else if (MoveCount == 3) {
-			thirdDir = dir;
-			Debug.Log (firstDir + " " + secondDir + " " + thirdDir);
-			MoveCount = 0;
+			lastPositionY = key.GridPosition ().y;
+			lastPositionX = key.GridPosition ().x;
 		}
 
 
+
+
+
+
+	} 
+
+	void TrackMoves(int dir){
+		bool isPlaced = false;
+
+		
+		for (int i = 0; i < moveDirections.Length; i++) {
+			if (moveDirections [i] == 0) {
+				moveDirections [i] = dir;
+				isPlaced = true;
+
+				break;
+
+			}
+		}
+
+
+		if (!isPlaced) {
+			moveDirections [0] = moveDirections [1];
+			moveDirections [1] = moveDirections [2];
+			moveDirections [2] = dir;
+		}
+
+		if (DefensePatternCheck()) {
+			Debug.Log ("Defensive Formation Created");
+		}
+
+//		Debug.Log (moveDirections[0] + " " + moveDirections[1] + " " + moveDirections[2]);
+
+		
 	}
 		
 
@@ -322,6 +379,10 @@ public class Recording : MonoBehaviour {
 				key.ClearKeyFrames ();
 //				gridPositionX.Clear ();
 //				gridPositionY.Clear ();
+
+				moveDirections[0] = 0;
+				moveDirections [1] = 0;
+				moveDirections [2] = 0;
 
 
 				recPos.Clear ();
@@ -398,7 +459,43 @@ public class Recording : MonoBehaviour {
 
 	public void ReplenishSegments(){
 		Segments = maxSegments;
-		
+
+	}
+
+	public bool DefensePatternCheck(){
+		bool patternMade = false;
+
+		int [] defeseFormation = new int [3] ;
+
+		defeseFormation [0] = 1;
+		defeseFormation [1] = 2;
+		defeseFormation [2] = -1;
+
+		for (int index = 0; index < moveDirections.Length; index++) {
+
+			if (Mathf.Abs (moveDirections [index]) != Mathf.Abs (defeseFormation [index])) {
+
+
+				patternMade = false;
+				break;
+
+			} else {
+				patternMade = true;
+			}
+
+		}
+
+
+		if (moveDirections [2] != moveDirections[0] * -1 ) {
+
+			patternMade = false;
+
+		} 
+
+
+
+
+		return patternMade;
 	}
 
 

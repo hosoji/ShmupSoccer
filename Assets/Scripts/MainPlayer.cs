@@ -96,6 +96,9 @@ public class MainPlayer : MonoBehaviour {
 		PlayerGridControls();
 //		print (X + "  " + Z);
 
+
+	
+
 	}
 
 //	void PlayerControl(){
@@ -188,6 +191,7 @@ public class MainPlayer : MonoBehaviour {
 		// When player is in the set position...
 		if (transform.position == gridPos) {
 
+		
 
 			record.segmentRemoved = false;
 				
@@ -201,11 +205,16 @@ public class MainPlayer : MonoBehaviour {
 
 			if (!frameAdded) {
 
-				key.AreaNodeAssignment (transform.position);
 				record.PathCheck ();
+				key.AreaNodeAssignment (transform.position);
+
+			
+
 				frameAdded = true;
 
 			}
+
+
 
 		
 			// Implements delay to Coord incrementing
@@ -218,6 +227,8 @@ public class MainPlayer : MonoBehaviour {
 					usingAxis = false;
 				}
 			}
+
+		
 
 			
 		} else {
