@@ -5,6 +5,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour {
 
 	public GameObject player1;
+	public GameObject player2;
 
 	public Transform [,] gridArray;
 	GameObject grid;
@@ -51,6 +52,11 @@ public class GameManager : MonoBehaviour {
 			player1.GetComponent<KeyframeScript> ().AreaNodeAssignment (gridArray[0,i].position);
 			player1.GetComponent<KeyframeScript> ().keyFrames.Clear ();
 
+			player2.GetComponent<KeyframeScript> ().AreaNodeAssignment (gridArray[rowLength-1,i].position);
+			player2.GetComponent<KeyframeScript> ().keyFrames.Clear ();
+
 		}
+
+	
 	}
 }

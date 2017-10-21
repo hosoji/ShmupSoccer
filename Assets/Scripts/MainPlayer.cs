@@ -97,6 +97,7 @@ public class MainPlayer : MonoBehaviour {
 //		print (X + "  " + Z);
 
 
+
 	
 
 	}
@@ -130,14 +131,17 @@ public class MainPlayer : MonoBehaviour {
 //	}
 
 	public void PlayerAction(){
+		Debug.Log ("Maybe bullet count issue?");
 
 		//If bullets fired are less than the max bullet amount, allow firing
 
 		if (bullets.Count < bulletsMax) {
 
+			Debug.Log ("Reached here");
+
 			if (!hasFired) {
 				//Creates projectile from prefab and sets its Velocity and which player fired it. Also adds it to a list for bullet amount check
-				GameObject projectileInstance = Instantiate (prefab, transform.position + transform.forward * 2f, Quaternion.Euler (transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z));
+				GameObject projectileInstance = Instantiate (prefab, key.attackPoints[key.attackIndex] + transform.forward * 2f, Quaternion.Euler (transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z));
 				ProjectileScript ps = projectileInstance.GetComponent<ProjectileScript> ();
 
 				ps.initialVelocity = transform.forward * 20f;
@@ -146,6 +150,7 @@ public class MainPlayer : MonoBehaviour {
 				ps.pNum = playerNum;
 				bullets.Add (projectileInstance);
 
+//				key.attackIndex++;
 				hasFired = true;
 			}
 		}
@@ -181,7 +186,6 @@ public class MainPlayer : MonoBehaviour {
 	}
 
 	void PlayerGridControls(){
-
 		// buffer for controller sensitivity
 		float buffer = 0.2f;
 		float controllerVertical = Input.GetAxis (input.vertical);
@@ -195,9 +199,11 @@ public class MainPlayer : MonoBehaviour {
 
 			record.segmentRemoved = false;
 				
-			record.RecordAction ();
+//			record.RecordAction ();
 
 			gridPos = gameManager.gridArray [X, Z].position;
+
+
 
 			if (record.Segments > 0 ) {
 				ControllerInput (controllerVertical, controllerHorizontal, buffer);
@@ -205,18 +211,14 @@ public class MainPlayer : MonoBehaviour {
 
 			if (!frameAdded) {
 
+				key.StorePerimeterPoints (gridPos);
 				record.PathCheck ();
-				key.AreaNodeAssignment (transform.position);
-
-			
+				key.KeyFrameSettings (gridPos);
 
 				frameAdded = true;
 
 			}
 
-
-
-		
 			// Implements delay to Coord incrementing
 
 			if (usingAxis) {
@@ -239,8 +241,6 @@ public class MainPlayer : MonoBehaviour {
 			}
 		}
 
-
-		 
 	}
 		
 
@@ -322,22 +322,22 @@ public class MainPlayer : MonoBehaviour {
 		gridPos = transform.position;
 	}
 
-	public void PlaybackAction(){
-		if (Input.GetButtonDown (input.fire)) {
-			if (!isPressed && play.isPlaying) {
-
-				if (key.KeyFrameDistanceCheck (transform.position)) {
-//					record.recPos.Add (transform.position);
-//					record.recButton.Add (true);
-					PlayerAction ();
-
-//					key.ActionFrameAssignment (transform.position, true);
-					isPressed = true;
-				}
-			}
-		}
-
-	}
+//	public void PlaybackAction(){
+//		if (Input.GetButtonDown (input.fire)) {
+//			if (!isPressed && play.isPlaying) {
+//
+//				if (key.KeyFrameDistanceCheck (transform.position)) {
+////					record.recPos.Add (transform.position);
+////					record.recButton.Add (true);
+//					PlayerAction ();
+//
+////					key.ActionFrameAssignment (transform.position, true);
+//					isPressed = true;
+//				}
+//			}
+//		}
+//
+//	}
 
 
 }

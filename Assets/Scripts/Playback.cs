@@ -13,6 +13,8 @@ public class Playback : MonoBehaviour {
 	public bool isPlaying = false;
 	public bool isPaused = false;
 
+	bool nodeRecognized = false;
+
 
 	float t = 0;
 	float r = 0;
@@ -58,11 +60,44 @@ public class Playback : MonoBehaviour {
 
 			if (isPlaying && !isPaused) {
 
-				player.PlaybackAction ();
+//				player.PlaybackAction ();
 
-	
+
 
 				record.nextPos = record.recPos [record.posIndex];
+
+				for (int i = 0; i < key.nodes.Count; i++) {
+
+					//This line might be causing problems
+					if (record.recPos [record.posIndex] == key.nodes[key.blockIndex]) {
+						if (!nodeRecognized) {
+
+							if (key.ready [key.blockIndex]) {
+//								Debug.Log ("activating block");
+								key.ActivateQueuedBlocker ();
+							}
+
+						
+							nodeRecognized = true;
+						}
+					}
+				}
+
+				for (int i = 0; i < key.attkNode.Count; i++) {
+
+					if (record.recPos [record.posIndex] == key.attkNode [key.attackIndex]) {
+						if (!nodeRecognized) {
+
+							if (key.attkReady [i]) {
+								Debug.Log ("attacking");
+								key.ActivateQueuedAttack ();
+							}
+
+
+							nodeRecognized = true;
+						}
+					}
+				}
 //				play.enabled = true;
 //				rec.enabled = false;
 
@@ -72,12 +107,13 @@ public class Playback : MonoBehaviour {
 
 				if (transform.position == record.nextPos) {
 
-
+			
 
 					// Used to slow down incrementing
 					t += Time.deltaTime;
 					if (t >= playbackSpeed) { 
 						record.posIndex++;
+						nodeRecognized = false;
 						t = 0;
 
 					}
@@ -86,6 +122,9 @@ public class Playback : MonoBehaviour {
 
 		} else {
 
+			// Put End of Playing calls and  Code here 
+
+			key.ResetIndex ();
 		
 			record.posIndex = 0;
 			record.playTime = 0;

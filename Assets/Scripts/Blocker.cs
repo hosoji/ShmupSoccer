@@ -6,6 +6,8 @@ public class Blocker : MonoBehaviour {
 
 	public float recTimRegain = 0.2f;
 
+	public float health;
+
 	void OnCollisionEnter(Collision col){
 		if (col.gameObject.tag == "Bullet") {
 
@@ -20,6 +22,16 @@ public class Blocker : MonoBehaviour {
 			Debug.Log ("Overlapping blocks!");
 			Destroy (gameObject);
 		}
+	}
+
+	public void DisableBlock(){
+		GetComponent<Collider> ().enabled = false;
+		GetComponent<MeshRenderer> ().enabled = false;
+	}
+
+	public void EnableBlock(){
+		GetComponent<Collider> ().enabled = true;
+		GetComponent<MeshRenderer> ().enabled = true;
 	}
 
 }

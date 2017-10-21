@@ -49,26 +49,32 @@ public class ProjectileScript : MonoBehaviour
 	}
 
 	void OnCollisionEnter(Collision collision){
+		
 		if (collision.gameObject.tag == "Player") {
 			if (collision.gameObject.GetComponent<RecorderUnitScript> () != null) {
 				collision.gameObject.GetComponent<RecorderUnitScript> ().health -= damageAmount;
 			}
+
+			Debug.Log ("Player collision");
 			DestroyBullet (gameObject);
 
 		}
 
 		if (collision.gameObject.tag == "Wall") {
+
 			DestroyBullet (gameObject);
 
 		}
 
 		if (collision.gameObject.tag == "GOAL_A") {
 			ScoreManager.p2Score++;
+
 			DestroyBullet (gameObject);
 		}
 
 		if (collision.gameObject.tag == "GOAL_B") {
 			ScoreManager.p1Score++;
+
 			DestroyBullet (gameObject);
 		}
 

@@ -13,10 +13,8 @@ public class Recording : MonoBehaviour {
 	int [] moveDirections = new int [3] ;
 
 
-
-
-	int lastPositionX = 0;
-	int lastPositionY = 0;
+	int lastPositionX;
+	int lastPositionY;
 
 	int firstDir, secondDir, thirdDir;
 
@@ -119,7 +117,6 @@ public class Recording : MonoBehaviour {
 		lr.textureMode = LineTextureMode.Tile;
 
 
-
 	}
 
 	void Start(){
@@ -128,6 +125,12 @@ public class Recording : MonoBehaviour {
 	
 		Segments = maxSegments;
 
+
+		lastPositionX = key.GridPosition().x;
+		lastPositionY = key.GridPosition().y;
+
+//		print (gameObject.name + " : " + lastPositionX + " " + lastPositionY); 
+//
 
 	}
 
@@ -141,12 +144,6 @@ public class Recording : MonoBehaviour {
 //		RecordingPlayer ();
 		play.Play ();
 
-//		Debug.Log (gridPositionX.Count);
-
-//		for (int i = 0; i < moveDirections.Length; i++) {
-//			print (moveDirections [i]);
-//		}
-//
 
 		ClearPath ();
 
@@ -269,18 +266,20 @@ public class Recording : MonoBehaviour {
 
 
 		int dir = 9;
-		
+		//Debug.Log(key
+		//Debug.Log(gameObject.name +" " + key.GridPosition().x +", "+lastPositionX);
+		//Debug.Log(gameObject.name +" " + key.GridPosition().x +", "+lastPositionX);
 		if (Mathf.Abs (key.GridPosition ().x - lastPositionX) == 1 && key.GridPosition ().y - lastPositionY == 0 ) {
-			
+
 
 			if (key.GridPosition ().x - lastPositionX > 0) {
-//				Debug.Log ("Moved Right");
+				//Debug.Log (gameObject.name+"Moved Right");
 				dir = 1;
 				TrackMoves (dir);
 				MoveCount++;
 					
 			} else {
-//				Debug.Log ("Moved Left");
+				//Debug.Log (gameObject.name+"Moved Left");
 				dir = -1;
 				TrackMoves (dir);
 				MoveCount++;
@@ -291,13 +290,13 @@ public class Recording : MonoBehaviour {
 		if (Mathf.Abs (key.GridPosition ().y - lastPositionY) == 1 && key.GridPosition ().x - lastPositionX == 0) {
 
 			if (key.GridPosition ().y - lastPositionY > 0) {
-//				Debug.Log ("Moved Up");
+				//Debug.Log (gameObject.name+"Moved Up");
 				dir = 2 ;
 				TrackMoves (dir);
 				MoveCount++;
 
 			} else {
-//				Debug.Log ("Moved Down");
+				//Debug.Log (gameObject.name+"Moved Down");
 				dir = -2 ;
 				TrackMoves (dir);
 				MoveCount++;
@@ -308,25 +307,25 @@ public class Recording : MonoBehaviour {
 		if (Mathf.Abs (key.GridPosition ().y - lastPositionY) == 1 &&  Mathf.Abs(key.GridPosition ().x - lastPositionX) == 1) {
 
 			if (key.GridPosition ().y - lastPositionY > 0 && key.GridPosition ().x - lastPositionX > 0) {
-				Debug.Log ("Moved UpRight");
+//				Debug.Log ("Moved UpRight");
 				dir = 3;
 				TrackMoves (dir);
 				MoveCount++;
 
 			} else if (key.GridPosition ().y - lastPositionY > 0 && key.GridPosition ().x - lastPositionX < 0) {
-				Debug.Log ("Moved UpLeft");
-				dir = -3 ;
+//				Debug.Log ("Moved UpLeft");
+				dir = 3 ;
 				TrackMoves (dir);
 				MoveCount++;
 
 			} else if (key.GridPosition ().y - lastPositionY < 0 && key.GridPosition ().x - lastPositionX > 0) {
-				Debug.Log ("Moved DownRight");
-				dir = 4;
+//				Debug.Log ("Moved DownRight");
+				dir = -3;
 				TrackMoves (dir);
 				MoveCount++;
 			} else {
-				Debug.Log ("Moved DownLeft");
-				dir = -4;
+//				Debug.Log ("Moved DownLeft");
+				dir = -3;
 				TrackMoves (dir);
 				MoveCount++;
 			}
@@ -362,9 +361,17 @@ public class Recording : MonoBehaviour {
 			moveDirections [2] = dir;
 		}
 
-		if (DefensePatternCheck()) {
-			Debug.Log ("Defensive Formation Created");
+		if (AttackPatternCheck()) {
+			Debug.Log (gameObject.name + " Attack Formation Created");
+			key.QueueAttack ();
 		}
+			
+		if (DefensePatternCheck()) {
+			Debug.Log (gameObject.name + "Defensive Formation Created");
+			key.QueueBlocker ();
+		}
+
+
 
 //		Debug.Log (moveDirections[0] + " " + moveDirections[1] + " " + moveDirections[2]);
 
@@ -376,9 +383,22 @@ public class Recording : MonoBehaviour {
 	void ClearPath(){
 		if (!play.isPlaying && !Input.GetButton(input.recording)){
 			if (Input.GetButtonDown (input.cancel)) {
+
+//				for (int x = 0; x < key.activeBlocks.Count; x++) {
+//					if (!key.activeBlocks [x].GetComponent<Collider> ().enabled) {
+//						Destroy (key.activeBlocks [x]);
+//						key.blockPoints.Remove (key.blockPoints [x]);
+//						key.activeBlocks.Remove (key.activeBlocks [x]);
+//					}
+//				}
+//
+
+				
+				for (int i = 0; i < key.perimeterPoints.Length; i ++){
+					key.perimeterPoints [i] = Vector3.zero;
+				}
 				key.ClearKeyFrames ();
-//				gridPositionX.Clear ();
-//				gridPositionY.Clear ();
+
 
 				moveDirections[0] = 0;
 				moveDirections [1] = 0;
@@ -393,45 +413,52 @@ public class Recording : MonoBehaviour {
 
 				recTime = 0;
 				player.ResetPlayerPos ();
+
 				ReplenishSegments ();
 
-//				key.KeyFrameAssignment ();
-//				gridPositionX.Add(key.GridPosition ().x);
-//				gridPositionY.Add(key.GridPosition ().y);
-				lastPositionX = 0;
-				lastPositionY = 0;
+
+				lastPositionX = player.X;
+
+				lastPositionY = player.Z;
+
 				MoveCount = 0;
 
+				key.StorePerimeterPoints (player.gridPos);
+
+		
+
+		
+
 			}
 		}
 	}
 
-	public void RecordAction(){
-		if (Input.GetButtonDown (input.fire)) {
-			if (!isPressed) {
-
-				if (key.KeyFrameDistanceCheck (transform.position)) {
-					recPos.Add (transform.position);
-					recButton.Add (true);
-					key.ActionFrameAssignment (transform.position, true);
-					isPressed = true;
-				}
-			}
-		}
-
-		if (Input.GetButtonDown (input.block)) {
-			if (!isPressed) {
-
-				if (key.KeyFrameDistanceCheck (transform.position)) {
-					recPos.Add (transform.position);
-					recDefense.Add (true);
-					key.ActionFrameAssignment (transform.position, false);
-					isPressed = true;
-				}
-			}
-
-		}
-	}
+//	public void RecordAction(){
+//		if (Input.GetButtonDown (input.fire)) {
+//			if (!isPressed) {
+//
+//				if (key.KeyFrameDistanceCheck (transform.position)) {
+//					recPos.Add (transform.position);
+//					recButton.Add (true);
+//					key.ActionFrameAssignment (transform.position, true);
+//					isPressed = true;
+//				}
+//			}
+//		}
+//
+//		if (Input.GetButtonDown (input.block)) {
+//			if (!isPressed) {
+//
+//				if (key.KeyFrameDistanceCheck (transform.position)) {
+//					recPos.Add (transform.position);
+//					recDefense.Add (true);
+//					key.ActionFrameAssignment (transform.position, false);
+//					isPressed = true;
+//				}
+//			}
+//
+//		}
+//	}
 		
 
 	public void UseSegments(){
@@ -493,10 +520,55 @@ public class Recording : MonoBehaviour {
 		} 
 
 
+		return patternMade;
+	}
+
+	public bool AttackPatternCheck(){
+		bool patternMade = false;
+
+		int [] attackFormation = new int [3] ;
+
+		attackFormation [0] = 3;
+
+		if (moveDirections [0] > 0) {
+			attackFormation [1] = -2;
+			
+		} else {
+			attackFormation [1] = 2;
+		}
+
+		attackFormation [2] = -3;
+
+	
+
+		for (int index = 0; index < moveDirections.Length; index++) {
+
+			if (Mathf.Abs (moveDirections [index]) != Mathf.Abs (attackFormation [index])) {
+
+
+				patternMade = false;
+				break;
+
+			} else {
+				patternMade = true;
+//				Debug.Log ("pattern true");
+			}
+
+		}
+
+		if (moveDirections [1] != attackFormation[1] ) {
+			patternMade = false;
+		} 
+
+
+		if (moveDirections [2] != moveDirections[0] ) {
+			patternMade = false;
+		} 
 
 
 		return patternMade;
 	}
+
 
 
 
