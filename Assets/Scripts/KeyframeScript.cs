@@ -128,7 +128,7 @@ public class KeyframeScript : MonoBehaviour {
 		for (int i = 0; i < activeAttacks.Count; i++) {
 			Destroy (activeAttacks [i]);
 		}
-
+		attkNode.Clear ();
 		activeAttacks.Clear ();
 		attackPoints.Clear ();
 		attkReady.Clear ();
